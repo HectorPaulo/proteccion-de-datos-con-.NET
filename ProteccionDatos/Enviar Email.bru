@@ -1,0 +1,15 @@
+meta {
+  name: Enviar Email
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:5116/api/encriptaciones/enviar-email
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

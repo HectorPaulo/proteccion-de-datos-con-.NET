@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using DataProtection.Helpers;
+using DataProtection.Models;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,13 @@ public class EncriptacionesController : ControllerBase
 {
     private readonly IDataProtector _protectorEjemplo;
     private readonly ITimeLimitedDataProtector _protectorToken;
+    private readonly ITimeLimitedDataProtector _protectorEmail;
 
     public EncriptacionesController(IDataProtectionProvider dataProtectionProvider)
     {
         _protectorEjemplo = dataProtectionProvider.CreateProtector("Ejemplo");
         _protectorToken = dataProtectionProvider.CreateProtector("Token").ToTimeLimitedDataProtector();
+        _protectorEmail = dataProtectionProvider.CreateProtector("Email").ToTimeLimitedDataProtector();
     }
 
     [HttpGet("encriptar/{textoPlano}")]
@@ -54,6 +57,35 @@ public class EncriptacionesController : ControllerBase
         catch(CryptographicException)
         {
             return BadRequest(Mensajes.Token.InvalidToken);
+        }
+    }
+
+    [HttpGet("generar-token-email")]
+    public ActionResult GenerarTokenEmail()
+    {
+        var guid = Guid.NewGuid().ToString();
+        var token = _protectorEmail.Protect(guid, lifetime: TimeSpan.FromMinutes(5));
+        return Ok(token);
+    }
+
+    [HttpPost("enviar-email/{token}")]
+    public ActionResult EnviarEmail(string token, [FromBody] Email email)
+    {
+        try
+        {
+            _protectorEmail.Unprotect(token);
+            return Ok(
+                new
+                {
+                    Mensaje = Mensajes.Email.EmailSent,
+                    email.To,
+                    email.Subject,
+                    email.Body
+                });
+        }
+        catch (CryptographicException)
+        {
+            return BadRequest(Mensajes.Email.EmailError);
         }
     }
 }
