@@ -1,0 +1,6 @@
+@DataProtection_HostAddress = http://localhost:5116
+
+GET {{DataProtection_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

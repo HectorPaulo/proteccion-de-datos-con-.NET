@@ -1,0 +1,15 @@
+meta {
+  name: Generacion de Token con fecha de caducidad
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:5116/api/encriptaciones/generar-token
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
